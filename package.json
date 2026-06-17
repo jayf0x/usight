@@ -1,6 +1,6 @@
 {
   "name": "usight",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Manage Übersicht widgets from GitHub — no git required",
   "type": "module",
   "bin": {
