@@ -43,6 +43,7 @@ node -e "
 
 # ── test ──────────────────────────────────────────────────────────────────────
 node test/test.js
+node test/integration.js
 
 # ── commit + tag + push (GHA workflow handles npm publish) ────────────────────
 git add package.json
