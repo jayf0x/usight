@@ -3,6 +3,7 @@
 import { install, uninstall, list, setPath } from '../lib/widgets.js';
 import { getConfig } from '../lib/config.js';
 import { getWidgetsDir } from '../lib/ubersicht.js';
+import { detectRuntime } from '../lib/runtime.js';
 
 const [,, cmd, ...args] = process.argv;
 
@@ -22,9 +23,11 @@ const commands = {
   },
   config: () => {
     const cfg = getConfig();
+    const runtime = detectRuntime();
     console.log(`Cache path:   ${cfg.cachePath}`);
     console.log(`Widgets dir:  ${getWidgetsDir()}`);
     console.log(`Installed:    ${Object.keys(cfg.widgets).length} widget(s)`);
+    if (runtime) console.log(`Runtime hint: ${runtime} (informational only)`);
   },
   help: () => help(),
 };

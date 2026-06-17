@@ -1,10 +1,12 @@
 import assert from 'assert';
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, mkdtempSync, rmSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir, homedir } from 'os';
+import { gzipSync, gunzipSync } from 'zlib';
 
-import { parseRepo } from '../lib/github.js';
+import { parseRepo, extractTar } from '../lib/github.js';
 import { getConfig, saveConfig, resolvePath } from '../lib/config.js';
+import { detectRuntime } from '../lib/runtime.js';
 
 let passed = 0;
 let failed = 0;
@@ -53,22 +55,89 @@ test('throws on null', () => {
   assert.throws(() => parseRepo(null), /No repository specified/);
 });
 
+// ── extractTar ─────────────────────────────────────────────────────────────
+console.log('\nextractTar');
+
+// Build a minimal tar buffer that mirrors GitHub's archive layout:
+// topdir/file.txt and topdir/sub/nested.txt
+function makeTar(entries) {
+  const blocks = [];
+
+  for (const { name, content = '' } of entries) {
+    const contentBuf = Buffer.from(content);
+    const header = Buffer.alloc(512);
+
+    Buffer.from(name).copy(header, 0);
+    Buffer.from('0000644\0').copy(header, 100);
+    Buffer.from(contentBuf.length.toString(8).padStart(11, '0') + '\0').copy(header, 124);
+    header[156] = name.endsWith('/') ? 53 : 48; // '5' dir, '0' file
+
+    blocks.push(header);
+
+    if (contentBuf.length > 0) {
+      const padded = Buffer.alloc(Math.ceil(contentBuf.length / 512) * 512);
+      contentBuf.copy(padded);
+      blocks.push(padded);
+    }
+  }
+
+  blocks.push(Buffer.alloc(1024)); // end-of-archive
+  return Buffer.concat(blocks);
+}
+
+test('extracts files and strips top-level dir', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'usight-'));
+  try {
+    const tar = makeTar([
+      { name: 'topdir/' },
+      { name: 'topdir/widget.coffee', content: 'command: "uptime"' },
+    ]);
+    extractTar(tar, tmp);
+    assert.ok(existsSync(join(tmp, 'widget.coffee')));
+    assert.strictEqual(readFileSync(join(tmp, 'widget.coffee'), 'utf8'), 'command: "uptime"');
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('extracts nested directories', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'usight-'));
+  try {
+    const tar = makeTar([
+      { name: 'topdir/' },
+      { name: 'topdir/sub/' },
+      { name: 'topdir/sub/nested.jsx', content: 'export default () => <div />' },
+    ]);
+    extractTar(tar, tmp);
+    assert.ok(existsSync(join(tmp, 'sub', 'nested.jsx')));
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('handles empty archive gracefully', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'usight-'));
+  try {
+    extractTar(Buffer.alloc(1024), tmp); // two zero blocks = end-of-archive
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
 // ── resolvePath ────────────────────────────────────────────────────────────
 console.log('\nresolvePath');
 
 test('expands ~', () => {
-  const result = resolvePath('~/foo/bar');
-  assert.strictEqual(result, join(homedir(), 'foo/bar'));
+  assert.strictEqual(resolvePath('~/foo/bar'), join(homedir(), 'foo/bar'));
 });
 
 test('leaves absolute path unchanged', () => {
   assert.strictEqual(resolvePath('/tmp/foo'), '/tmp/foo');
 });
 
-// ── config round-trip (uses a temp config dir) ────────────────────────────
+// ── config ─────────────────────────────────────────────────────────────────
 console.log('\nconfig');
 
-// Temporarily redirect config by monkey-patching — we just test the shape
 test('getConfig returns defaults when no file exists', () => {
   const cfg = getConfig();
   assert.ok(typeof cfg.cachePath === 'string');
@@ -79,11 +148,23 @@ test('saveConfig + getConfig round-trip', () => {
   const cfg = getConfig();
   const before = JSON.stringify(cfg);
   saveConfig(cfg);
-  const after = JSON.stringify(getConfig());
-  assert.strictEqual(before, after);
+  assert.strictEqual(JSON.stringify(getConfig()), before);
 });
 
-// ── bin exists and is executable ───────────────────────────────────────────
+// ── runtime detection ──────────────────────────────────────────────────────
+console.log('\nruntime');
+
+test('detectRuntime returns string or null', () => {
+  const r = detectRuntime();
+  assert.ok(r === null || typeof r === 'string');
+});
+
+test('detected runtime is a known tool', () => {
+  const r = detectRuntime();
+  if (r !== null) assert.ok(['bun', 'pnpm', 'npm'].includes(r));
+});
+
+// ── bin ────────────────────────────────────────────────────────────────────
 console.log('\nbin');
 
 test('bin/usight.js exists', () => {
