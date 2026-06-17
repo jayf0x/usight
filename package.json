@@ -1,7 +1,7 @@
 {
   "name": "usight",
   "version": "0.1.1",
-  "description": "Manage Übersicht widgets from GitHub — no git required",
+  "description": "Manage installs for Übersicht widgets from GitHub — no git required",
   "type": "module",
   "bin": {
     "usight": "bin/usight.js"
@@ -28,13 +28,13 @@
     "widget-manager"
   ],
   "author": {
-    "name": "Jonatan Verstraete",
-    "email": "jonatanverstraete@outlook.com"
+    "name": "Jay F0x",
+    "email": "jjay56883@gmail.com"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jayf0x/usight"
+    "url": "git+https://github.com/jayf0x/usight.git"
   },
   "homepage": "https://github.com/jayf0x/usight#readme",
   "bugs": {
