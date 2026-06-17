@@ -1,6 +1,6 @@
 # usight
 
-Install and manage [Übersicht](https://tracesof.net/uebersicht/) widgets directly from GitHub — no git required.
+Install and manage [Übersicht](https://tracesof.net/uebersicht/) widgets directly from GitHub or the official widget registry — no git required.
 
 ## Installation
 
@@ -11,26 +11,35 @@ npm install -g usight
 ## Usage
 
 ```bash
-# Install a widget from GitHub
+# Install from GitHub (uses tagged release if one exists, otherwise HEAD)
 usight install hw2007/ubersicht-neofetch
 usight install https://github.com/hw2007/ubersicht-neofetch
 
-# Remove a widget
-usight uninstall ubersicht-neofetch
+# Install from the official Übersicht widget registry
+usight install AnalogClock
+
+# Install from a direct .zip URL
+usight install https://raw.githubusercontent.com/foo/bar/master/foo.widget.zip
+
+# Search the official registry
+usight search clock
 
 # List installed widgets
 usight list
 
-# Change where widgets are cached
-usight set --path ~/my-widgets-cache
+# Remove a widget
+usight uninstall ubersicht-neofetch
 
-# Show current config
+# Show current config (cache path, widgets dir)
 usight config
+
+# Change where widgets are cached (moves existing widgets automatically)
+usight set --path ~/my-widgets-cache
 ```
 
 ## How it works
 
-Downloads a GitHub repository as a tarball, extracts it into a local cache (`~/.cache/usight` by default), and creates a symlink in your Übersicht widgets directory. No git, no background processes, no telemetry.
+Downloads a GitHub repository or `.widget.zip` archive, extracts it into a local cache (`~/.cache/usight` by default), and creates a symlink in your Übersicht widgets directory. Prefers tagged releases when available, falls back to the HEAD tarball. No git, no background processes, no telemetry.
 
 ## Requirements
 
