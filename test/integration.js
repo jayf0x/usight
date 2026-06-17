@@ -85,7 +85,7 @@ await test('searchRegistry — "clock" returns results', async () => {
   const results = await searchRegistry('clock');
   assert.ok(results.length > 0, 'no results for "clock"');
   assert.ok(
-    results.every(w => w.id.toLowerCase().includes('clock') || w.name.toLowerCase().includes('clock')),
+    results.every(w => w.id?.toLowerCase().includes('clock') || w.name?.toLowerCase().includes('clock')),
     'result does not match query'
   );
 });
