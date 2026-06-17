@@ -1,0 +1,43 @@
+{
+  "name": "usight",
+  "version": "0.1.0",
+  "description": "Manage Übersicht widgets from GitHub — no git required",
+  "type": "module",
+  "bin": {
+    "usight": "bin/usight.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node test/test.js",
+    "release": "bash publish-npm.sh"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "ubersicht",
+    "übersicht",
+    "widgets",
+    "macos",
+    "cli",
+    "widget-manager"
+  ],
+  "author": {
+    "name": "Jonatan Verstraete",
+    "email": "jonatanverstraete@outlook.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jayf0x/usight"
+  },
+  "homepage": "https://github.com/jayf0x/usight#readme",
+  "bugs": {
+    "url": "https://github.com/jayf0x/usight/issues"
+  }
+}
