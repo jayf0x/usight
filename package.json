@@ -1,7 +1,8 @@
 {
   "name": "usight",
   "version": "0.1.6",
-  "description": "Manage installs for Übersicht widgets from GitHub — no git required",
+  "sideEffects": false,
+  "description": "Manage installs for \u00dcbersicht widgets from GitHub \u2014 no git required",
   "type": "module",
   "bin": {
     "usight": "bin/usight.js"
@@ -21,7 +22,7 @@
   },
   "keywords": [
     "ubersicht",
-    "übersicht",
+    "\u00fcbersicht",
     "widgets",
     "macos",
     "cli",
